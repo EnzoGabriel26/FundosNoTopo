@@ -29,7 +29,7 @@ try:
         st.error("Erro ao carregar dados da API.")
 except:
     #caso o streamlit não acesse a url
-    df = pd.read_csv('../bases_tratadas/fiis.csv', encoding='utf-8', sep=';')
+    df = pd.read_csv('bases_tratadas/fiis.csv', encoding='utf-8', sep=';')
     df.rename(columns={"P/VP": "PVP", "N COTISTAS": "NCOTISTAS", 
                    "CAGR DIVIDENDOS 3 ANOS": "CAGRDIV", 
                    "LIQUIDEZ MEDIA DIARIA": "LIQD",
