@@ -17,21 +17,26 @@ st.markdown(
     unsafe_allow_html=True
 )
 # URL api
-url = "http://localhost:5000/fiis"
-url2 = "http://localhost:5000/indices"
+url = "http://127.0.0.1:5000/fiis"
+url2 = "http://127.0.0.1:5000/indices"
 
 # Fazer a requisição para a API Flask
-response = requests.get(url)
-response2 = requests.get(url2)
-
-if response.status_code == 200:
+try:
+    response = requests.get(url)
+    response2 = requests.get(url2)
+    if response.status_code == 200:
     # Carregar os dados do JSON no formato 'table' para um DataFrame
-    json_data = response.json()
-    json_data2 = response2.json()
-    df = pd.read_json(json_data, orient='table')
-    df2 = pd.read_json(json_data2, orient='table')
-else:
-    st.error("Erro ao carregar dados da API.")
+        json_data = response.json()
+        json_data2 = response2.json()
+        df = pd.read_json(json_data, orient='table')
+        df2 = pd.read_json(json_data2, orient='table')
+    else:
+        st.error("Erro ao carregar dados da API.")
+except:
+    #caso o streamlit não acesse a url
+    df = pd.read_csv('../bases_tratadas/fiis.csv', sep=';')
+    df2 = pd.read_csv('../bases_tratadas/indice.csv', sep=';')
+
 
 dfTabela = df.copy()
 

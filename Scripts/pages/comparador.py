@@ -16,17 +16,20 @@ st.markdown(
 st.sidebar.header('Escolha de dois a cinco fundos para comparar')
 
 # URL api
-url = "http://localhost:5000/fiis"
+url = "http://127.0.0.1:5000/fiis"
 
 # Fazer a requisição para a API Flask
-response = requests.get(url)
-
-if response.status_code == 200:
+try:
+    response = requests.get(url)
+    if response.status_code == 200:
     # Carregar os dados do JSON no formato 'table' para um DataFrame
-    json_data = response.json()
-    df = pd.read_json(json_data, orient='table')
-else:
-    st.error("Erro ao carregar dados da API.")
+        json_data = response.json()
+        df = pd.read_json(json_data, orient='table')
+    else:
+        st.error("Erro ao carregar dados da API.")
+except:
+    #caso o streamlit não acesse a url
+    df = pd.read_csv('../bases_tratadas/fiis.csv', sep=';')
 
 fundos = df['TICKER'].unique()
 fundos_selec = st.sidebar.multiselect('Selecione um Fundo', fundos)
