@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 import requests
 from plotly import graph_objects as go
+import sqlite3
 
 st.set_page_config(
     page_title="Fiis",
@@ -30,11 +31,8 @@ try:
         st.error("Erro ao carregar dados da API.")
 except:
     #caso o streamlit não acesse a url
-    df = pd.read_csv('bases_tratadas/fiis.csv', encoding='utf-8', sep=';')
-    df.rename(columns={"P/VP": "PVP", "N COTISTAS": "NCOTISTAS", 
-                   "CAGR DIVIDENDOS 3 ANOS": "CAGRDIV", 
-                   "LIQUIDEZ MEDIA DIARIA": "LIQD",
-                   "ULTIMO DIVIDENDO": "ULTDIV", 'VALOR PATRIMONIAL COTA': 'VPC',' CAGR VALOR CORA 3 ANOS': 'CAGRVLR', 'PERCENTUAL EM CAIXA': 'CAIXA', ' N COTAS': 'NCOTA'}, inplace=True)    
+    cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
+    df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 
 fundos = df['TICKER']
 

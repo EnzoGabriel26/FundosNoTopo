@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 from plotly import graph_objects as go
 import requests
-
+import sqlite3
 # Configurações da página no Streamlit
 st.set_page_config(
     page_title="Home",
@@ -19,7 +19,6 @@ st.markdown(
 # URL api
 url = "http://127.0.0.1:5000/fiis"
 url2 = "http://127.0.0.1:5000/indices"
-
 # Fazer a requisição para a API Flask
 try:
     response = requests.get(url)
@@ -34,18 +33,9 @@ try:
         st.error("Erro ao carregar dados da API.")
 except:
     #caso o streamlit não acesse a url
-    df = pd.read_csv('bases_tratadas/fiis.csv', encoding='utf-8', sep=';')
-    df2 = pd.read_csv('bases_tratadas/indice.csv', encoding='utf-8', sep=';')
-    df = df.drop('Unnamed: 0', axis=1)
-    df.rename(columns={"P/VP": "PVP", "N COTISTAS": "NCOTISTAS", 
-                   "CAGR DIVIDENDOS 3 ANOS": "CAGRDIV", 
-                   "LIQUIDEZ MEDIA DIARIA": "LIQD",
-                   "ULTIMO DIVIDENDO": "ULTDIV", 'VALOR PATRIMONIAL COTA': 'VPC',' CAGR VALOR CORA 3 ANOS': 'CAGRVLR', 'PERCENTUAL EM CAIXA': 'CAIXA', ' N COTAS': 'NCOTA'}, inplace=True)
-    df2 = df2.drop('Unnamed: 0', axis=1)
-    df2['ifix'] = df2['ifix'].str.replace(' pts', '').str.replace('.', '').str.replace(',', '.').astype(float)
-    df2['CDI'] = df2['CDI'].str.replace(',', '.').str.replace('%', '').astype(float)
-
-
+    cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
+    df = pd.read_sql('SELECT * FROM fiis', con=cnx)
+    df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
 dfTabela = df.copy()
 
