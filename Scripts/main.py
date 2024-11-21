@@ -16,9 +16,9 @@ st.markdown(
     f"<h1 style='font-size: 28px;'>Informações sobre os {qtd_fundos} Fundos de Investimento Imobiliário com mais cotistas listados na B3</h1>", 
     unsafe_allow_html=True
 )
-cnx = sqlite3.connect('banco_fiis.db')
-df = pd.read_sql('SELECT * FROM banco_fiis.fiis', con=cnx)
-df2 = pd.read_sql('SELECT * FROM banco_fiis.indices', con=cnx)
+cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
+df = pd.read_sql('SELECT * FROM fiis', con=cnx)
+df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
 dfTabela = df.copy()
 

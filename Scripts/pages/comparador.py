@@ -16,7 +16,7 @@ st.markdown(
 )
 st.sidebar.header('Escolha de dois a cinco fundos para comparar')
 
-cnx = sqlite3.connect('banco_fiis.db')
+cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
 df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
