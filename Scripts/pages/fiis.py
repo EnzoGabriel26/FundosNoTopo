@@ -19,7 +19,10 @@ st.markdown(
 
 st.sidebar.header('Escolha um fundo')
 
-cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
+try:
+    cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
+except:
+    cnx = sqlite3.connect('bases_tratadas/banco_fiis.db')
 df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
