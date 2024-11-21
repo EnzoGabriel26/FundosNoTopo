@@ -17,8 +17,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 cnx = sqlite3.connect('banco_fiis.db')
-df = pd.read_sql('SELECT * FROM fiis', con=cnx)
-df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
+df = pd.read_sql('SELECT * FROM banco_fiis.fiis', con=cnx)
+df2 = pd.read_sql('SELECT * FROM banco_fiis.indices', con=cnx)
 
 dfTabela = df.copy()
 

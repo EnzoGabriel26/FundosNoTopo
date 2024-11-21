@@ -20,8 +20,8 @@ st.markdown(
 st.sidebar.header('Escolha um fundo')
 
 cnx = sqlite3.connect('banco_fiis.db')
-df = pd.read_sql('SELECT * FROM fiis', con=cnx)
-df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
+df = pd.read_sql('SELECT * FROM banco_fiis.fiis', con=cnx)
+df2 = pd.read_sql('SELECT * FROM banco_fiis.indices', con=cnx)
 
 fundos = df['TICKER']
 
