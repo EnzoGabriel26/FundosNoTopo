@@ -26,6 +26,9 @@ except:
 df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
+def number_format(n):
+    return f"{n:.2f}".replace(',', '*').replace('.',',').replace('*','.')
+
 fundos = df['TICKER']
 
 fundo_selec = st.sidebar.selectbox('Selecione um Fundo', fundos)
@@ -45,13 +48,10 @@ response = requests.get(url, params=params)
 # Verificando o status da requisição
 if response.status_code == 200:
     data = response.json()
-    
     # Acessando a lista de preços históricos
     historical_data = data['results'][0]['historicalDataPrice']
-    
     # Convertendo para DataFrame
     dfValor = pd.DataFrame(historical_data)
-    
     # Convertendo a coluna 'date' para um formato legível (timestamp para datetime)
     dfValor['date'] = pd.to_datetime(dfValor['date'], unit='s')
 else:
@@ -64,11 +64,11 @@ st.markdown(
 )
 
 colValor, colDY, colPVP, colVar, colVarP = st.columns(5)
-colValor.metric('Valor da Cota', value=f"R${df2.PRECO.mean()}")
-colDY.metric('Dividend Yield', value=f"{df2.DY.mean():.2f}%")
-colPVP.metric('P/VP', value=f"{df2.PVP.mean():.2f}")
-colVar.metric('Variação (3 meses)', value=f"R${(df2.PRECO.mean()-dfValor['close'].iat[0]):.2f}")
-colVarP.metric('Variação % (3 meses)', value=f"{(((df2.PRECO.mean()-dfValor['close'].iat[0])/dfValor['close'].iat[0])*100):.2f}%")
+colValor.metric('Valor da Cota', value=f"R${number_format(df2.PRECO.mean())}")
+colDY.metric('Dividend Yield', value=f"{number_format(df2.DY.mean())}%")
+colPVP.metric('P/VP', value=f"{number_format(df2.PVP.mean())}")
+colVar.metric('Variação (3 meses)', value=f"R${number_format((df2.PRECO.mean()-dfValor['close'].iat[0]))}")
+colVarP.metric('Variação % (3 meses)', value=f"{number_format((((df2.PRECO.mean()-dfValor['close'].iat[0])/dfValor['close'].iat[0])*100))}%")
     
 grafValor = go.Figure(data=[go.Candlestick(x=dfValor['date'],
                 open=dfValor['open'],
@@ -82,18 +82,18 @@ grafValor.update_xaxes(rangebreaks=[
 st.plotly_chart(grafValor)
 
 col1, col2, col3, col4, col5 = st.columns(5)
-col1.metric('Último Dividendo', value=f"R${df2.ULTDIV.mean():.2f}")
-col2.metric('Valor Patrimonial por Cota', value=f"R${df2.VPC.mean():.2f}")
-col3.metric('Patrimônio (em milhões)', value=f"R${(df2.PATRIMONIO.mean()/1000000):.2f}")
-col4.metric('Percentual em Caixa', value=f"{df2.CAIXA.mean()}%")
+col1.metric('Último Dividendo', value=f"R${number_format(df2.ULTDIV.mean())}")
+col2.metric('Valor Patrimonial por Cota', value=f"R${number_format(df2.VPC.mean())}")
+col3.metric('Patrimônio (em milhões)', value=f"R${number_format((df2.PATRIMONIO.mean()/1000000))}")
+col4.metric('Percentual em Caixa', value=f"{number_format(df2.CAIXA.mean())}%")
 col5.metric('Gestão', value=f"{df2.GESTAO.max()}")
 
 col6, col7, col8, col9, col10 = st.columns(5)
-col6.metric('Liquidez Diária', value=f"R${df2.LIQD.mean():.2f}")
-col7.metric('Número de Cotistas', value=f"{df2.NCOTISTAS.mean():.2f}")
-col8.metric('Número de Cotas', value=f"{df2.NCOTA.mean():.2f}")
-col9.metric('CAGR Dividendo', value=f"{df2.CAGRDIV.mean():.2f}")
-col10.metric('CAGR Valor', value=f"{df2.CAGRVLR.mean():.2f}")
+col6.metric('Liquidez Diária', value=f"R${number_format(df2.LIQD.mean())}")
+col7.metric('Número de Cotistas', value=f"{number_format(df2.NCOTISTAS.mean())}")
+col8.metric('Número de Cotas', value=f"{number_format(df2.NCOTA.mean())}")
+col9.metric('CAGR Dividendo', value=f"{number_format(df2.CAGRDIV.mean())}")
+col10.metric('CAGR Valor', value=f"{number_format(df2.CAGRVLR.mean())}")
 
 
 

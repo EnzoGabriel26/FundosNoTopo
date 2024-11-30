@@ -20,8 +20,13 @@ try:
     cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
 except:
     cnx = sqlite3.connect('bases_tratadas/banco_fiis.db')
+
+
 df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
+
+def number_format(n):
+    return f"{n:.2f}".replace(',', '*').replace('.',',').replace('*','.')
 
 fundos = df['TICKER'].unique()
 fundos_selec = st.sidebar.multiselect('Selecione um Fundo', fundos)
@@ -53,7 +58,7 @@ if 2 <= len(fundos_selec) <= 5:
                                ]
             for item in itensComparador:
                 st.write(f"""                  
-                        <div style='text-align: center; font-size: 20px; height: 70px;'; >{item['nome']}<br><span style='text-align: center; font-size: 28px'>{item['tipo']} {item['column'].mean():.2f}{item['tipo2']}</span></div>""",                  
+                        <div style='text-align: center; font-size: 20px; height: 70px;'; >{item['nome']}<br><span style='text-align: center; font-size: 28px'>{item['tipo']} {number_format(item['column'].mean())}{item['tipo2']}</span></div>""",                  
                         unsafe_allow_html=True)
                 st.write("---")         
             

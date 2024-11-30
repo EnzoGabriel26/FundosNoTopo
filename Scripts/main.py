@@ -5,6 +5,8 @@ import plotly.express as px
 from plotly import graph_objects as go
 import requests
 import sqlite3
+import statistics
+
 # Configurações da página no Streamlit
 st.set_page_config(
     page_title="Home",
@@ -20,6 +22,7 @@ try:
     cnx = sqlite3.connect('../bases_tratadas/banco_fiis.db')
 except:
     cnx = sqlite3.connect('bases_tratadas/banco_fiis.db')
+
 df = pd.read_sql('SELECT * FROM fiis', con=cnx)
 df2 = pd.read_sql('SELECT * FROM indices', con=cnx)
 
@@ -27,8 +30,10 @@ dfTabela = df.copy()
 
 df_top100 = df.nlargest(qtd_fundos, 'NCOTISTAS')
 
+def number_format(n):
+    return f"{n:.2f}".replace(',', '*').replace('.',',').replace('*','.')
+
 #contas para análise de gráficos
-cdi = df2['CDI'].mean()
 mediaDY = df_top100['DY'].mean()
 medianaDY = df_top100['DY'].median()
 mediaPVP = df_top100['PVP'].mean()
@@ -36,7 +41,7 @@ medianaPVP = df_top100['PVP'].median()
 # Contagem de fundos acima da média de Dividend Yield
 fundos_acima_media_dy = df_top100[df_top100['DY'] > mediaDY].shape[0]
 # Contagem de fundos com DY maior que o CDI
-fundos_acima_cdi = df_top100[df_top100['DY'] > cdi].shape[0]
+fundos_acima_cdi = df_top100[df_top100['DY'] > df2['CDI'].mean()].shape[0]
 # Contagem de fundos cima da mediana DY
 fundos_acima_mediana_dy = df_top100[df_top100['DY'] > medianaDY].shape[0]
 # Contagem de fundos com PVP maior que a média
@@ -50,18 +55,19 @@ fundos_acima_mediana_pvp = df_top100[df_top100['PVP'] > medianaPVP].shape[0]
 # Exibição das informações gerais sobre os Fiis
 with st.expander('Informações gerais sobre os Fiis'):
     colIfix, colCdi, colNull = st.columns(3)
-    colIfix.metric('IFIX', value=f"{df2.ifix.mean():.2f}")
-    colCdi.metric('CDI', value=f'{df2.CDI.mean():.2f}%')
+    colIfix.metric('IFIX', value=f"{number_format(df2.ifix.mean())}")
+    colCdi.metric('CDI', value=f'{number_format(df2.CDI.mean())}%')
+
 
     colDY, colPVP, colCagr = st.columns(3)
-    colDY.metric('Dividend Yield', value=f"{df_top100.DY.mean():.2f}%")
-    colPVP.metric('P/VP', value=f"{df_top100.PVP.mean():.2f}")
-    colCagr.metric('Cagr de Dividendos (últimos 3 anos)', value=f"{df_top100.CAGRDIV.mean():.2f}%")
+    colDY.metric('Dividend Yield', value=f"{number_format(df_top100.DY.mean())}%")
+    colPVP.metric('P/VP', value=f"{number_format(df_top100.PVP.mean())}")
+    colCagr.metric('Cagr de Dividendos (últimos 3 anos)', value=f"{number_format(df_top100.CAGRDIV.mean())}%")
 
     colLiq, colCotistas, colGestao = st.columns(3)
-    colLiq.metric('Liquidez Diária Média (Milhar)', value=f"R${(df_top100.LIQD.mean()/1000):.2f}")
-    colGestao.metric('Patrimônio Médio (Milhar)', value=f"R${(df_top100.PATRIMONIO.mean()/1000):.2f}")
-    colCotistas.metric('Número médio de cotistas', value=f"{df_top100.NCOTISTAS.mean():.0f}")
+    colLiq.metric('Liquidez Diária Média (Milhar)', value=f"R${number_format((df_top100.LIQD.mean()/1000))}")
+    colGestao.metric('Patrimônio Médio (Milhar)', value=f"R${number_format((df_top100.PATRIMONIO.mean()/1000))}")
+    colCotistas.metric('Número médio de cotistas', value=f"{number_format(df_top100.NCOTISTAS.mean())}")
 
 # Exibição dos gráficos
 with st.expander('Gráficos gerais sobre os Fiis'):
@@ -82,11 +88,11 @@ with st.expander('Gráficos gerais sobre os Fiis'):
         )
         st.plotly_chart(graf1)
     st.markdown(f'<h4 style=font-size: 16px;>  Análise rápida </h4>', unsafe_allow_html=True)
-    st.markdown(f'Nos {qtd_fundos} fundos com mais cotistas, existem {fundos_acima_media_dy} fundos que pagam acima da média do mercado ({mediaDY:.2f}%), {fundos_acima_mediana_dy} estão acima da mediana ({medianaDY:.2f}) e {fundos_acima_cdi} que pagam mais que o CDI ({cdi:.2f}%).')
+    st.markdown(f"Nos {qtd_fundos} fundos com mais cotistas, existem {fundos_acima_media_dy} fundos que pagam acima da média do mercado ({number_format(mediaDY)}%), {fundos_acima_mediana_dy} estão acima da mediana ({number_format(medianaDY)}) e {fundos_acima_cdi} que pagam mais que o CDI ({number_format(df2['CDI'].mean())}%).")
     if fundos_acima_cdi > (qtd_fundos/2):
-        st.markdown(f'A maioria dos fundos ({((fundos_acima_cdi/qtd_fundos)*100):.2f}%) estão pagando mais que a renda fixa.')
+        st.markdown(f'A maioria dos fundos ({number_format(((fundos_acima_cdi/qtd_fundos)*100))}%) estão pagando mais que a renda fixa.')
     else:
-        st.markdown(f'A renda fixa está pagando mais que a maioria dos fundos ({((fundos_acima_cdi/qtd_fundos)*100):.2f}%)')
+        st.markdown(f'A renda fixa está pagando mais que a maioria dos fundos ({number_format(((fundos_acima_cdi/qtd_fundos)*100))}%)')
     with colgraf2:
         # Histograma de Dividend Yield
         graf2 = px.histogram(df_top100, x='DY', title='Histograma de Dividend Yield')
@@ -110,7 +116,7 @@ with st.expander('Gráficos gerais sobre os Fiis'):
         )
         st.plotly_chart(graf3)
     st.markdown(f'<h4 style=font-size: 16px;>  Análise rápida </h4>', unsafe_allow_html=True)
-    st.markdown(f'Nos {qtd_fundos} fundos com mais cotistas, existem {fundos_acima_media_pvp} fundos com o P/VP acima da média do mercado ({mediaPVP:.2f}), {fundos_acima_mediana_pvp} estão acima da mediana ({medianaPVP:.2f}) e {fundos_acima_pvp_1} que estão com o P/VP acima de 1.0')
+    st.markdown(f'Nos {qtd_fundos} fundos com mais cotistas, existem {fundos_acima_media_pvp} fundos com o P/VP acima da média do mercado ({number_format(mediaPVP)}), {fundos_acima_mediana_pvp} estão acima da mediana ({medianaPVP:.2f}) e {fundos_acima_pvp_1} que estão com o P/VP acima de 1.0')
     if fundos_acima_pvp_1 > (qtd_fundos/2):
         st.markdown(f'O valor da maioria dos fundos ({((fundos_acima_pvp_1/qtd_fundos)*100):.2f}%) estão negociando ACIMA do seu valor patrimonial. O mercado pode estar um pouco caro.')
     else:
@@ -133,7 +139,7 @@ with st.expander('Gráficos gerais sobre os Fiis'):
             title='Relação entre Número de Cotistas e Dividend Yield',
         )
         st.plotly_chart(graf5)
-        correlacaoGraf5 = df["NCOTISTAS"].corr(df["DY"])
+        correlacaoGraf5 = df_top100["NCOTISTAS"].corr(df_top100["DY"])
         st.markdown(f'<h4 style=font-size: 16px;>  Análise rápida </h4>', unsafe_allow_html=True)
         st.markdown(f'O índice de correlação entre o Número de Cotistas e o Dividend Yield é de: {correlacaoGraf5:.3f}')
         if (correlacaoGraf5 >= 0.8 or correlacaoGraf5 <= -0.8):
@@ -159,7 +165,7 @@ with st.expander('Gráficos gerais sobre os Fiis'):
             title='Relação entre CAGR de Dividendos e CAGR de Valor Patrimonial',
         )
         st.plotly_chart(graf6)
-        correlacaoGraf6 = df["CAGRDIV"].corr(df["CAGRVLR"])
+        correlacaoGraf6 = df_top100["CAGRDIV"].corr(df_top100["CAGRVLR"])
         st.markdown(f'<h4 style=font-size: 16px;>  Análise rápida </h4>', unsafe_allow_html=True)
         st.markdown(f'O índice de correlação entre o Número de Cotistas e o Dividend Yield é de: {correlacaoGraf6:.3f}')
         if (correlacaoGraf6 >= 0.8 or correlacaoGraf6 <= -0.8):
